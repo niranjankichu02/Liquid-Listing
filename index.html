@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Liquid Listings Pro - No AI</title>
+  <style>
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      text-align: center; 
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
+      color: white;
+      min-height: 100vh; margin: 0; padding: 40px; 
+      display: flex; align-items: center; justify-content: center;
+    }
+    .container { 
+      background: rgba(255, 255, 255, 0.05); 
+      backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+      padding: 30px; border-radius: 20px; 
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4); 
+      width: 100%; max-width: 500px; 
+    }
+    h1 { margin-bottom: 5px; font-weight: 300; }
+    p { color: #ccc; margin-bottom: 20px; }
+    
+    .input-group { margin-bottom: 15px; text-align: left; padding: 0 10%; }
+    label { font-size: 14px; color: #ddd; display: block; margin-bottom: 5px; }
+    
+    input[type="text"], select, input[type="file"] { 
+      padding: 10px; font-size: 16px; width: 100%; box-sizing: border-box;
+      border-radius: 8px; background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2); color: white; outline: none; 
+    }
+    input[type="text"]:focus, select:focus { border-color: #00d2ff; }
+    option { background: #203a43; color: white; }
+    
+    input[type="range"] { width: 100%; accent-color: #00d2ff; }
+    
+    button { 
+      padding: 12px 25px; font-size: 16px; margin-top: 15px; width: 80%;
+      background: linear-gradient(to right, #3a7bd5, #3a6073);
+      color: white; border: none; border-radius: 10px; cursor: pointer; 
+      font-weight: bold; transition: 0.2s; 
+    }
+    button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(58,123,213,0.4); }
+    
+    .divider { margin: 15px 0; color: #888; font-size: 14px; font-weight: bold; text-align: center; }
+
+    .liquid-loader {
+      display: none; width: 50px; height: 50px;
+      border: 3px solid rgba(255, 255, 255, 0.2); border-radius: 50%;
+      position: relative; overflow: hidden; margin: 20px auto;
+    }
+    .liquid-loader::after {
+      content: ''; position: absolute; top: 40%; left: -50%; width: 200%; height: 200%;
+      background: #00d2ff; border-radius: 40%; animation: wave 2s linear infinite;
+    }
+    @keyframes wave { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-20px) rotate(360deg); } }
+    
+    .screen { display: none; animation: fadeIn 0.6s ease-in; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    ul { text-align: left; background: rgba(0, 0, 0, 0.2); padding: 15px 25px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
+    li { margin-bottom: 12px; color: #ddd; line-height: 1.4; }
+    b { color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- Screen 1: Welcome -->
+    <div id="screen1" class="screen active">
+      <h1>💧 Welcome to Liquid Listings</h1>
+      <p>Are you ready to construct a highly unstable, terrible house entirely out of liquid food?</p>
+      <button onclick="nextScreen()">Let's Build It</button>
+    </div>
+
+    <!-- Screen 2: Input Data -->
+    <div id="screen2" class="screen">
+      <h2>Architectural Inputs</h2>
+      
+      <div class="input-group">
+        <label>Type or Select a Food Item</label>
+        <input list="foodOptions" id="foodItem" placeholder="e.g., Rasam, Chai, Ghee...">
+        <datalist id="foodOptions">
+          <option value="Rasam"><option value="Sambar"><option value="Dal"><option value="Payasam">
+          <option value="Kanji"><option value="Buttermilk"><option value="Chai"><option value="Filter Coffee">
+          <option value="Melted Ghee"><option value="Coconut Oil"><option value="Tomato Soup">
+          <option value="Soy Sauce"><option value="Melted Chocolate"><option value="Water">
+        </datalist>
+      </div>
+
+      <div class="divider">--- OR ---</div>
+
+      <div class="input-group">
+        <label>Upload a Picture of the Food</label>
+        <input type="file" id="foodImage" accept="image/*">
+        <small style="color: #888; font-size: 11px;">(We will scan its pixels for structural integrity)</small>
+      </div>
+
+      <div class="input-group" style="margin-top: 15px;">
+        <label>Weather Condition</label>
+        <select id="weather">
+          <option value="sunny">Sunny ☀️</option>
+          <option value="rainy">Rainy 🌧️</option>
+          <option value="freezing">Freezing ❄️</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>Viscosity (Thickness): <span id="viscVal">50</span>%</label>
+        <input type="range" id="viscosity" min="1" max="100" value="50" oninput="document.getElementById('viscVal').innerText = this.value">
+      </div>
+      
+      <button onclick="startBuild()">Generate Blueprint</button>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="screen-loading" class="screen">
+      <h2>Analyzing Fluidity...</h2>
+      <div class="liquid-loader" style="display: block;"></div>
+    </div>
+
+    <!-- Screen 3: Results -->
+    <div id="screen3" class="screen">
+      <h2 id="title"></h2>
+      <p style="color: #00d2ff;">Blueprint Generated Successfully</p>
+      <ul>
+        <li><b>Durability:</b> <span id="durability"></span></li>
+        <li><b>Evaporation Status:</b> <span id="evaporation"></span></li>
+        <li><b>Pest Status:</b> <span id="pests"></span></li>
+      </ul>
+      <button onclick="location.reload()" style="background: #444; margin-top: 10px;">Build Another</button>
+    </div>
+
+  </div>
+
+  <script>
+    function nextScreen() {
+      document.getElementById('screen1').classList.remove('active');
+      document.getElementById('screen2').classList.add('active');
+    }
+
+    function startBuild() {
+      document.getElementById('screen2').classList.remove('active');
+      document.getElementById('screen-loading').classList.add('active');
+      setTimeout(showHouse, 2500); 
+    }
+
+    function showHouse() {
+      const textInput = document.getElementById('foodItem').value;
+      const fileInput = document.getElementById('foodImage').files[0];
+      let food = 'Mystery Sludge';
+
+      // Check if they typed something or uploaded an image
+      if (textInput) {
+        food = textInput;
+      } else if (fileInput) {
+        // Just grabs the file name without the .jpg/.png extension for the joke
+        food = fileInput.name.split('.')[0] + " Extract";
+      }
+
+      const weather = document.getElementById('weather').value;
+      const viscosity = document.getElementById('viscosity').value;
+
+      document.getElementById('title').innerText = "The " + food + " Villa";
+      
+      let durScore = viscosity - 60; 
+      document.getElementById('durability').innerText = durScore + "% (Based on viscosity)";
+
+      let evapText = "";
+      if (weather === "sunny") evapText = "Evaporating rapidly. Gone in 5 minutes.";
+      else if (weather === "rainy") evapText = "Flooding immediately. The roof is a puddle.";
+      else if (weather === "freezing") evapText = "Frozen solid! Structurally sound until spring.";
+      document.getElementById('evaporation').innerText = evapText;
+
+      const pestList = [
+        "Mosquitoes are throwing a pool party in the kitchen.", 
+        "Stray dogs are drinking the walls.", 
+        "Ants floating in the hallway.", 
+        "Completely pest-free (too spicy).",
+        "A family of pigeons moved into the roofing."
+      ];
+      document.getElementById('pests').innerText = pestList[Math.floor(Math.random() * pestList.length)];
+      
+      document.getElementById('screen-loading').classList.remove('active');
+      document.getElementById('screen3').classList.add('active');
+    }
+  </script>
+</body>
+</html>
